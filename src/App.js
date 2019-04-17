@@ -11,6 +11,7 @@ import {
   TextInput
 } from 'grommet';
 import { FormClose, Notification } from 'grommet-icons';
+import queryString from 'query-string';
 
 const theme = {
   global: {
@@ -25,7 +26,8 @@ const theme = {
   },
 };
 
-const AppBar = (props) => (
+
+const AppBar = (props) => ( 
   <Box 
     tag="header"
     direction="row"
@@ -120,7 +122,7 @@ const fakeServerData = {
           }
         ]
       },{
-        name: 'Songs of the West',
+        name: 'Songs of the East',
         songs: [
           {
             title: 'Mariah',
@@ -276,14 +278,14 @@ class Playlist extends Component {
         height="small"
         pad="medium"
         round="small"
-        align="left"
         elevation="small"
       >
-        <h3 align="center">{playlist.name}</h3>
+        <h3>{playlist.name}</h3>
+        <img src={playlist.imageUrl} />
         {
           playlist.songs
             .slice(0, songPreviewLength)
-            .map( song => <Text size="small">{song.title}</Text> )
+            .map( song => <Text key={song.title} size="small">{song.title}</Text> )
         }
       </Box>
     )
@@ -294,7 +296,7 @@ class Playlists extends Component {
   render() {
     let playlists = this.props.playlists.map( (playlist) => {
       return (
-        <Playlist playlist={playlist}/>
+        <Playlist key={playlist.name} playlist={playlist}/>
       )
     })
     return (
@@ -327,7 +329,6 @@ class Sidebar extends Component {
           <Box direction="row" background="light-2" tag="header" justify="end" align="center">
             <Button 
               icon={<FormClose/>}
-              //onClick={() => { this.setState({ showSidebar: false })}}
               onClick={this.props.closeSidebar}
             />
           </Box>
@@ -346,16 +347,54 @@ class App extends Component {
     this.state = {
       filterString: '',
       serverData: {},
+      user: {},
+      playlists: [],
       showSidebar: false
     }
   }
 
   componentDidMount() {
+    let access_token = queryString.parse(window.location.search).access_token
+
+    const handleErrors = (response) => {
+      if(!response.ok) { throw Error(response.statusText) }
+      return response.json()
+    }
+  
+    fetch('https://api.spotify.com/v1/me', {
+      headers: {Authorization: 'Bearer ' + access_token}
+    })
+    .then(handleErrors)
+    .then( data => {
+      this.setState( {user: {name: data.display_name}} ) 
+    })
+    .catch( error => console.log(error) )
+
+    fetch('https://api.spotify.com/v1/me/playlists', {
+      headers: {Authorization: 'Bearer ' + access_token}
+    })
+    .then(handleErrors)
+    .then( data => {
+      this.setState({
+        playlists: data.items.map( item => {
+          return ({
+            name: item.name,
+            imageUrl: item.images.find( image => image.width == 640).url,
+            songs: []
+          })
+        })
+      }) 
+      console.log(this.state.playlists)
+      console.log(data.items)
+    })
+    .catch( error => console.log(error) )
+    /*
     setTimeout( () => {
       this.setState({
         serverData: fakeServerData
       })
-    }, 600)
+    }, 1600) 
+    */
   }
 
   closeSidebar = () => {
@@ -367,13 +406,15 @@ class App extends Component {
     const handleFilterInput = (input) => {
       this.setState({ filterString: input })
     }
-    let playlists = this.state.serverData.user ? this.state.serverData.user.playlists
-      .filter( playlist => {
-        return playlist.name
-          .toLowerCase()
-          .includes(this.state.filterString.toLowerCase())
-      }
-    ) : []
+    
+    let playlists = this.state.user && this.state.playlists
+      ? this.state.playlists
+          .filter( playlist => {
+            return playlist.name
+              .toLowerCase()
+              .includes(this.state.filterString.toLowerCase())
+          })
+      : []
 
     return (
       <Grommet theme={theme} full>
@@ -391,10 +432,10 @@ class App extends Component {
                 </Button>
               </AppBar>
               <Box direction="row" flex overflow={{ horizontal: 'hidden' }}>
-                <Box flex align="" fill="horizontal">
-                {this.state.serverData.user ?
+                <Box flex fill="horizontal">
+                {this.state.user ?
                   <div>
-                    <Title name={this.state.serverData.user.name}/>
+                    <Title name={this.state.user.name}/>
                     <PlaylistsStats playlists={playlists}/>
                     <Filter onTextChange={ text => handleFilterInput(text)} />
                     <Playlists playlists={playlists} />
