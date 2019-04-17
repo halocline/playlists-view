@@ -8,7 +8,8 @@ import {
   Layer, 
   ResponsiveContext,
   Text,
-  TextInput
+  TextInput,
+  Grid
 } from 'grommet';
 import { FormClose, Notification } from 'grommet-icons';
 import queryString from 'query-string';
@@ -274,14 +275,12 @@ class Playlist extends Component {
           style: "solid",
           side: "all"
         }}
-        basis="1/4"
-        height="small"
         pad="medium"
         round="small"
         elevation="small"
       >
         <h3>{playlist.name}</h3>
-        <img src={playlist.imageUrl} />
+        <img src={playlist.imageUrl} style={{width: '100%'}}/>
         {
           playlist.songs
             .slice(0, songPreviewLength)
@@ -300,13 +299,17 @@ class Playlists extends Component {
       )
     })
     return (
-      <Box 
-        direction="row-responsive" 
+      <Box  
         pad="medium" 
         background="light-2"
-        gap="small"
       >
-        {playlists}
+        <Grid 
+          align="start"
+          columns={{ count: "fill", size: "small" }}
+          gap="medium"
+        >
+          {playlists}
+        </Grid>
       </Box>
     )
   }
@@ -379,7 +382,7 @@ class App extends Component {
         playlists: data.items.map( item => {
           return ({
             name: item.name,
-            imageUrl: item.images.find( image => image.width == 640).url,
+            imageUrl: item.images.find( image => image.width === 60 ? image.width === 60 : image.width === 640 ).url,
             songs: []
           })
         })
