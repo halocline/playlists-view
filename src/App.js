@@ -6,7 +6,9 @@ import {
   Grommet, 
   Heading,
   Layer, 
-  ResponsiveContext 
+  ResponsiveContext,
+  Text,
+  TextInput
 } from 'grommet';
 import { FormClose, Notification } from 'grommet-icons';
 
@@ -229,13 +231,17 @@ class PlaylistsStats extends Component {
 class Filter extends Component {
   render() {
     return (
-      <div className="Filter">
-        <input 
+      <Box 
+        direction="row" 
+        width="medium"
+        margin="medium"
+      >
+        <TextInput 
           type="text" 
           placeholder="Search" 
           onChange={ event => this.props.onTextChange(event.target.value)}
         />
-      </div>
+      </Box>
     )
   }
 }
@@ -256,39 +262,30 @@ class Playlist extends Component {
     let songPreviewLength = 3
 
     return (
-      <Grommet>
-      {/*
-      <div style={{
-        ...defaultStyle,
-        width: "25%", 
-        display: "inline-block"
-      }}>
-    */}
       <Box 
-        background="light-1" 
+        background={{ 
+          color: "light-1"
+        }}
         border={{
-          color: "border",
+          color: "light-2",
           size: "xsmall",
           style: "solid",
           side: "all"
         }}
-        margin="medium"
-        pad="small"
+        basis="1/4"
+        height="small"
+        pad="medium"
         round="small"
-        width="20%"
-        display="inline-block"
+        align="left"
+        elevation="small"
       >
-        <h3>{playlist.name}</h3>
-        <ul>
-          {
-            playlist.songs
-              .slice(0, songPreviewLength)
-              .map( song => <li>{song.title}</li> )
-          }
-        </ul>
+        <h3 align="center">{playlist.name}</h3>
+        {
+          playlist.songs
+            .slice(0, songPreviewLength)
+            .map( song => <Text size="small">{song.title}</Text> )
+        }
       </Box>
-      {/*</div>*/}
-      </Grommet>
     )
   }
 }
@@ -301,13 +298,14 @@ class Playlists extends Component {
       )
     })
     return (
-      <Grommet>
-        <Box fill>
-          <div>
-            {playlists}
-          </div>
-        </Box>
-      </Grommet>
+      <Box 
+        direction="row-responsive" 
+        pad="medium" 
+        background="light-2"
+        gap="small"
+      >
+        {playlists}
+      </Box>
     )
   }
 }
@@ -357,7 +355,7 @@ class App extends Component {
       this.setState({
         serverData: fakeServerData
       })
-    }, 1200)
+    }, 600)
   }
 
   closeSidebar = () => {
