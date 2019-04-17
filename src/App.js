@@ -51,118 +51,6 @@ const playlistsStatsStyle = {
   display: 'inline-block'
 }
 
-const fakeServerData = {
-  user: {
-    name: 'Matt',
-    playlists: [
-      {
-        name: 'Gettin on up',
-        songs: [
-          {
-            title: 'Over the Rainbow',
-            artist: 'Izzy',
-            duration: 231
-          },
-          {
-            title: 'Three Little Birds',
-            artist: 'Bob Marley',
-            duration: 231
-          },
-          {
-            title: 'Enter Sandman',
-            artist: 'Metallica',
-            duration: 231
-          },
-          {
-            title: 'Burn One Down',
-            artist: 'Ben Harper',
-            duration: 301
-          },
-          {
-            title: 'MFC',
-            artist: 'Pearl Jam',
-            duration: 231
-          }
-        ]
-      },{
-        name: 'Gettin on down',
-        songs: [
-          {
-            title: 'Down',
-            artist: 'Nine Inch Nails',
-            duration: 231
-          },
-          {
-            title: 'Down in a Hole',
-            artist: 'Sound Garden',
-            duration: 231
-          },
-          {
-            title: 'Smells Like Teen Spirit',
-            artist: 'Nirvana',
-            duration: 231
-          }
-        ]
-      },{
-        name: 'Slidin\' Home',
-        songs: [
-          {
-            title: 'Down',
-            artist: 'Nine Inch Nails',
-            duration: 231
-          },
-          {
-            title: 'Down in a Hole',
-            artist: 'Sound Garden',
-            duration: 231
-          },
-          {
-            title: 'Smells Like Teen Spirit',
-            artist: 'Nirvana',
-            duration: 231
-          }
-        ]
-      },{
-        name: 'Songs of the East',
-        songs: [
-          {
-            title: 'Mariah',
-            artist: 'Nine Inch Nails',
-            duration: 231
-          },
-          {
-            title: 'Leave Your Guns at Home',
-            artist: 'Sound Garden',
-            duration: 231
-          },
-          {
-            title: 'Rawhide',
-            artist: 'Nirvana'
-          }
-        ]
-      },{
-        name: 'Songs of the West',
-        songs: [
-          {
-            title: 'Mariah',
-            artist: 'Nine Inch Nails',
-            duration: 231
-          },
-          {
-            title: 'Leave Your Guns at Home',
-            artist: 'Sound Garden',
-            duration: 231
-          },
-          {
-            title: 'Rawhide',
-            artist: 'Nirvana'
-          }
-        ]
-      }
-    ]
-  }
-}
-
 class PlaylistsNum extends Component {
   render() {
     return (
@@ -349,8 +237,6 @@ class App extends Component {
     super()
     this.state = {
       filterString: '',
-      serverData: {},
-      user: {},
       playlists: [],
       showSidebar: false
     }
@@ -358,9 +244,18 @@ class App extends Component {
 
   componentDidMount() {
     let access_token = queryString.parse(window.location.search).access_token
+    if (!access_token) {
+      console.log('No Access Token')
+      return  
+    }
 
     const handleErrors = (response) => {
-      if(!response.ok) { throw Error(response.statusText) }
+      if(!response.ok) { 
+        response.json().then( data => {
+          console.log(data.error)
+        })
+        throw Error(response)
+      }
       return response.json()
     }
   
@@ -371,7 +266,10 @@ class App extends Component {
     .then( data => {
       this.setState( {user: {name: data.display_name}} ) 
     })
-    .catch( error => console.log(error) )
+    .catch( error => {
+      console.log(error)
+      console.log(this.state.user)
+    })
 
     fetch('https://api.spotify.com/v1/me/playlists', {
       headers: {Authorization: 'Bearer ' + access_token}
@@ -391,13 +289,6 @@ class App extends Component {
       console.log(data.items)
     })
     .catch( error => console.log(error) )
-    /*
-    setTimeout( () => {
-      this.setState({
-        serverData: fakeServerData
-      })
-    }, 1600) 
-    */
   }
 
   closeSidebar = () => {
@@ -436,13 +327,26 @@ class App extends Component {
               </AppBar>
               <Box direction="row" flex overflow={{ horizontal: 'hidden' }}>
                 <Box flex fill="horizontal">
-                {this.state.user ?
-                  <div>
-                    <Title name={this.state.user.name}/>
-                    <PlaylistsStats playlists={playlists}/>
-                    <Filter onTextChange={ text => handleFilterInput(text)} />
-                    <Playlists playlists={playlists} />
-                  </div> : <div style={defaultStyle}>Fetching playlist data...</div>
+                {this.state.user
+                  ? <div>
+                      <Title name={this.state.user.name}/>
+                      <PlaylistsStats playlists={playlists}/>
+                      <Filter onTextChange={ text => handleFilterInput(text)} />
+                      <Playlists playlists={playlists} />
+                    </div> 
+                  : <div>
+                      <Button 
+                        label="Sign in to Spotify"
+                        onClick={() => {
+                          window.location = window.location.href.includes('localhost')
+                            ? 'http://localhost:8080/login'
+                            : 'http://localhost:8080/login'
+                        }}
+                        alignSelf="end"
+                        margin="large"
+                        primary="true"
+                      />
+                    </div>
                 }
                 </Box>
                 <Sidebar 
