@@ -167,8 +167,8 @@ class Playlist extends Component {
         round="small"
         elevation="small"
       >
-        <h3>{playlist.name}</h3>
         <img src={playlist.imageUrl} style={{width: '100%'}}/>
+        <h3>{playlist.name}</h3>
         {
           playlist.songs
             .slice(0, songPreviewLength)
@@ -185,6 +185,10 @@ class Playlists extends Component {
       return (
         <Playlist key={playlist.name} playlist={playlist}/>
       )
+    })
+    .sort( (a, b) => {
+      if (a.props.playlist.name.toLowerCase() < b.props.playlist.name.toLowerCase()) { return -1 }
+      else { return 1} 
     })
     return (
       <Box  
@@ -344,7 +348,7 @@ class App extends Component {
                         }}
                         alignSelf="end"
                         margin="large"
-                        primary="true"
+                        primary
                       />
                     </div>
                 }
