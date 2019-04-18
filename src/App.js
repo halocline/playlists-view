@@ -46,21 +46,12 @@ const defaultStyle = {
   color: 'gray'
 }
 
-const playlistsStatsStyle = {
-  width: '33%',
-  display: 'inline-block'
-}
-
 class PlaylistsNum extends Component {
   render() {
     return (
-      <div className="PlaylistsNum"
-            style={{
-              ...defaultStyle,
-              ...playlistsStatsStyle
-          }}>
+      <Box>
         <h2>{this.props.playlists.length} Playlists</h2>
-      </div>
+      </Box>
     )
   }
 }
@@ -71,13 +62,9 @@ class PlaylistsSongs extends Component {
       return songs.concat(playlist.songs)
     }, [])
     return (
-      <div className="PlaylistsNum"
-            style={{
-              ...defaultStyle,
-              ...playlistsStatsStyle
-          }}>
+      <Box>
         <h2>{allSongs.length} Songs</h2>
-      </div>
+      </Box>
     )
   }
 }
@@ -96,13 +83,9 @@ class PlaylistsTime extends Component {
     }, 0)
 
     return (
-      <div className="PlaylistsTime"
-            style={{
-              ...defaultStyle,
-              ...playlistsStatsStyle
-          }}>
+      <Box>
         <h2>{Math.round(totalPlayTime / 60)} Minutes of Music</h2>
-      </div>
+      </Box>
     )
   }
 }
@@ -110,11 +93,11 @@ class PlaylistsTime extends Component {
 class PlaylistsStats extends Component {
   render() {
     return (
-      <div>
+      <Box direction="row" margin="medium" gap="large">
         <PlaylistsNum playlists={this.props.playlists}/>
         <PlaylistsSongs playlists={this.props.playlists}/>
         <PlaylistsTime playlists={this.props.playlists}/>
-      </div>
+      </Box>
     )
   }
 }
@@ -140,9 +123,9 @@ class Filter extends Component {
 class Title extends Component {
   render(props) {
     return (
-      <div className="Title" style={defaultStyle}>
+      <Box direction="row" margin="medium">
         <h1>{this.props.name}'s Playlists</h1>
-      </div>
+      </Box>
     )
   }
 }
@@ -320,7 +303,7 @@ class App extends Component {
           {size => (
             <Box fill>
               <AppBar>
-                <Heading level="3" margin="none">Better Playlists</Heading>
+                <Heading level="3" margin="none">Spotify Playlists</Heading>
                 <Button 
                   icon={<Notification />} 
                   onClick={ () => { 
@@ -334,8 +317,8 @@ class App extends Component {
                 {this.state.user
                   ? <div>
                       <Title name={this.state.user.name}/>
-                      <PlaylistsStats playlists={playlists}/>
                       <Filter onTextChange={ text => handleFilterInput(text)} />
+                      <PlaylistsStats playlists={playlists}/>
                       <Playlists playlists={playlists} />
                     </div> 
                   : <div>
