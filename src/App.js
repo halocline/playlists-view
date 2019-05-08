@@ -3,13 +3,14 @@ import {
   Box, 
   Button, 
   Collapsible,
+  Grid,
   Grommet, 
   Heading,
+  Image,
   Layer, 
   ResponsiveContext,
   Text,
-  TextInput,
-  Grid
+  TextInput
 } from 'grommet';
 import { FormClose, Notification } from 'grommet-icons';
 import queryString from 'query-string';
@@ -41,10 +42,6 @@ const AppBar = (props) => (
     {...props}
   />
 )
-
-const defaultStyle = {
-  color: 'gray'
-}
 
 class PlaylistsNum extends Component {
   render() {
@@ -150,12 +147,25 @@ class Playlist extends Component {
         round="small"
         elevation="small"
       >
-        <img src={playlist.imageUrl} style={{width: '100%'}}/>
+        
+        <Image
+          width="100%"
+          fit="contain"
+          src={playlist.imageUrl}
+          a11yTitle={'Album cover preview for playlist named ' + playlist.name}
+        />
         <h3>{playlist.name}</h3>
         {
           playlist.songs
             .slice(0, songPreviewLength)
-            .map( song => <Text key={song.title} size="small">{song.title}</Text> )
+        .map( song => 
+            <Text 
+              key={song.track.id} 
+              size="small"
+            >
+              {song.track.name}
+            </Text> 
+          )
         }
       </Box>
     )
@@ -245,10 +255,9 @@ class App extends Component {
       }
       return response.json()
     }
-  
-    fetch('https://api.spotify.com/v1/me', {
-      headers: {Authorization: 'Bearer ' + access_token}
-    })
+
+    /* Fetch User Data*/
+    fetch('https://api.spotify.com/v1/me', {headers: {Authorization: 'Bearer ' + access_token} })
     .then(handleErrors)
     .then( data => {
       this.setState( {user: {name: data.display_name}} ) 
@@ -258,24 +267,44 @@ class App extends Component {
       console.log(this.state.user)
     })
 
+    /* Fetch User's Playlists */
     fetch('https://api.spotify.com/v1/me/playlists', {
       headers: {Authorization: 'Bearer ' + access_token}
     })
-    .then(handleErrors)
-    .then( data => {
-      this.setState({
-        playlists: data.items.map( item => {
-          return ({
-            name: item.name,
-            imageUrl: item.images.find( image => image.width === 60 ? image.width === 60 : image.width === 640 ).url,
-            songs: []
-          })
+      .then(handleErrors)
+      .then( playlistsData => {
+        let playlistTracksUrls = playlistsData.items.map( playlist => {
+          return playlist.tracks.href
         })
-      }) 
-      console.log(this.state.playlists)
-      console.log(data.items)
-    })
-    .catch( error => console.log(error) )
+        let playlistTracks = playlistTracksUrls.map( playlistTracksUrl => {
+          //console.log('URL', playlistTracksUrl)
+          let tracksPromise = fetch(playlistTracksUrl, {headers: {Authorization: 'Bearer ' + access_token} })
+          return tracksPromise.then( response => response.json() )
+        })
+        let allPlaylistsTracksPromises = Promise.all(playlistTracks)
+        let playlistsPromise = allPlaylistsTracksPromises
+          .then( playlistsTracks => {
+            playlistsTracks.forEach( (tracks, i) => {
+              playlistsData.items[i].tracks = tracks
+            })
+            return playlistsData
+          })
+        return playlistsPromise
+      })
+      .then( playlistsData => {
+        this.setState({
+          playlists: playlistsData.items.map( playlist => {
+            return ({
+              id: playlist.id,
+              name: playlist.name,
+              imageUrl: playlist.images.find( image => image.width === 60 ? image.width === 60 : image.width === 640 ).url,
+              songs: playlist.tracks.items
+            })
+          })
+        }) 
+        console.log('State - Playlists:', this.state.playlists)
+      })
+      .catch( error => console.log(error) )
   }
 
   closeSidebar = () => {
