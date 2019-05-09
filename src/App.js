@@ -131,6 +131,7 @@ class Playlist extends Component {
   render() {
     let playlist = this.props.playlist
     let songPreviewLength = 3
+    let artistsPreviewLength = 1
 
     return (
       <Box 
@@ -158,14 +159,18 @@ class Playlist extends Component {
         {
           playlist.songs
             .slice(0, songPreviewLength)
-        .map( song => 
-            <Text 
-              key={song.track.id} 
-              size="small"
-            >
-              {song.track.name}
-            </Text> 
-          )
+            .map( song => 
+                <Text 
+                  key={song.track.id} 
+                  size="small"
+                >
+                  {song.track.name}, {
+                    song.track.artists
+                      .slice(0, artistsPreviewLength)
+                      .map( artist => artist.name)
+                  }
+                </Text> 
+              )
         }
       </Box>
     )
