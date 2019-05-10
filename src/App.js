@@ -307,7 +307,6 @@ class App extends Component {
             })
           })
         }) 
-        console.log('State - Playlists:', this.state.playlists)
       })
       .catch( error => console.log(error) )
   }
@@ -328,10 +327,8 @@ class App extends Component {
             let playlistNameFilter = playlist.name
               .toLowerCase()
               .includes(this.state.filterString.toLowerCase())
-            console.log(playlistNameFilter)
 
             let songNameFilter = false
-            console.log(playlist.name, playlist.songs)
             playlist.songs.forEach( song => {
               if (song.track.name
                     .toLowerCase()
@@ -340,15 +337,12 @@ class App extends Component {
                     songNameFilter = true 
               }
             })
-            console.log(playlist.name, songNameFilter)
 
             let filterResults = playlistNameFilter || songNameFilter
             
             return filterResults
           })
       : []
-
-    console.log('Filtered Playlists:', playlists)
 
     return (
       <Grommet theme={theme} full>
