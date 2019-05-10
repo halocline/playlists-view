@@ -71,17 +71,22 @@ class PlaylistsTime extends Component {
     let allSongs = this.props.playlists.reduce( (songs, playlist) => {
       return songs.concat(playlist.songs)
     }, [])
-    let totalPlayTime = allSongs.reduce((playTime, song) => {
-      if (song.duration) {
-        return playTime + song.duration 
+    let totalPlayTime_ms = allSongs.reduce((playTime, song) => {
+      if (song.track.duration_ms) {
+        return playTime + song.track.duration_ms 
       } else {
         return playTime
       }
     }, 0)
+    let totalPlayTime_minutes = (totalPlayTime_ms / 1000) / 60
 
     return (
       <Box>
-        <h2>{Math.round(totalPlayTime / 60)} Minutes of Music</h2>
+        {
+          totalPlayTime_minutes > 60 
+            ? <h2>{Math.round(totalPlayTime_minutes / 60)} Hours</h2>
+            : <h2>{Math.round(totalPlayTime_minutes)} Minutes</h2>
+        }
       </Box>
     )
   }
@@ -321,6 +326,12 @@ class App extends Component {
       this.setState({ filterString: input })
     }
     
+    /* 
+     * Applying search string to filter playlist results.
+     * Search string is applied to both playlist names, as well as track names.
+     * If search string is contained in either a playlist name or track name,
+     * then the corresponding playlist is returned in the results.
+    */
     let playlists = this.state.user && this.state.playlists
       ? this.state.playlists
           .filter( playlist => {
