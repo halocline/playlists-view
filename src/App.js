@@ -325,11 +325,30 @@ class App extends Component {
     let playlists = this.state.user && this.state.playlists
       ? this.state.playlists
           .filter( playlist => {
-            return playlist.name
+            let playlistNameFilter = playlist.name
               .toLowerCase()
               .includes(this.state.filterString.toLowerCase())
+            console.log(playlistNameFilter)
+
+            let songNameFilter = false
+            console.log(playlist.name, playlist.songs)
+            playlist.songs.forEach( song => {
+              if (song.track.name
+                    .toLowerCase()
+                    .includes(this.state.filterString.toLowerCase())
+                  ) { 
+                    songNameFilter = true 
+              }
+            })
+            console.log(playlist.name, songNameFilter)
+
+            let filterResults = playlistNameFilter || songNameFilter
+            
+            return filterResults
           })
       : []
+
+    console.log('Filtered Playlists:', playlists)
 
     return (
       <Grommet theme={theme} full>
