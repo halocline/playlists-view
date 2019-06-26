@@ -1,273 +1,139 @@
-import React, { Component } from 'react';
-import { 
-  Box, 
-  Button, 
-  Collapsible,
-  Grid,
-  Grommet, 
-  Heading,
-  Image,
-  Layer, 
-  ResponsiveContext,
-  Text,
-  TextInput
-} from 'grommet';
-import { FormClose, Notification } from 'grommet-icons';
-import queryString from 'query-string';
-import theme from './Themes/theme'
-import { AppBar } from './Components/AppBar'
-import PlaylistsStats from './Containers/PlaylistsStats'
+import React, { Component } from "react";
+import { Box, Button, Grommet, Heading, ResponsiveContext } from "grommet";
+import { Notification } from "grommet-icons";
+import queryString from "query-string";
 
-class Filter extends Component {
-  render() {
-    return (
-      <Box 
-        direction="row" 
-        width="medium"
-        margin="medium"
-      >
-        <TextInput 
-          type="text" 
-          placeholder="Search" 
-          onChange={ event => this.props.onTextChange(event.target.value)}
-        />
-      </Box>
-    )
-  }
-}
-
-class Title extends Component {
-  render(props) {
-    return (
-      <Box direction="row" margin="medium">
-        <h1>{this.props.name}'s Playlists</h1>
-      </Box>
-    )
-  }
-}
-
-class Playlist extends Component {
-  render() {
-    let playlist = this.props.playlist
-    let songPreviewLength = 3
-    let artistsPreviewLength = 1
-
-    return (
-      <Box 
-        background={{ 
-          color: "light-1"
-        }}
-        border={{
-          color: "light-2",
-          size: "xsmall",
-          style: "solid",
-          side: "all"
-        }}
-        pad="medium"
-        round="small"
-        elevation="small"
-      >
-        
-        <Image
-          width="100%"
-          fit="contain"
-          src={playlist.imageUrl}
-          a11yTitle={'Album cover preview for playlist named ' + playlist.name}
-        />
-        <h3>{playlist.name}</h3>
-        {
-          playlist.songs
-            .slice(0, songPreviewLength)
-            .map( song => 
-                <Text 
-                  key={song.track.id} 
-                  size="small"
-                >
-                  {song.track.name}, {
-                    song.track.artists
-                      .slice(0, artistsPreviewLength)
-                      .map( artist => artist.name)
-                  }
-                </Text> 
-              )
-        }
-      </Box>
-    )
-  }
-}
-
-class Playlists extends Component {
-  render() {
-    let playlists = this.props.playlists.map( (playlist) => {
-      return (
-        <Playlist key={playlist.name} playlist={playlist}/>
-      )
-    })
-    .sort( (a, b) => {
-      if (a.props.playlist.name.toLowerCase() < b.props.playlist.name.toLowerCase()) { return -1 }
-      else { return 1} 
-    })
-    return (
-      <Box  
-        pad="medium" 
-        background="light-2"
-      >
-        <Grid 
-          align="start"
-          columns={{ count: "fill", size: "small" }}
-          gap="medium"
-        >
-          {playlists}
-        </Grid>
-      </Box>
-    )
-  }
-}
-
-class Sidebar extends Component {
-  render() {
-    const showSidebar = this.props.showSidebar
-    const size = this.props.size
-
-    return (
-      (!showSidebar || size !== 'small') ? (
-        <Collapsible direction="horizontal" open={showSidebar}>
-          <Box flex width="medium" background="light-2" elevation="small" align="center" justify="center">
-            Sidebar
-          </Box>
-        </Collapsible>
-      ) : (
-        <Layer>
-          <Box direction="row" background="light-2" tag="header" justify="end" align="center">
-            <Button 
-              icon={<FormClose/>}
-              onClick={this.props.closeSidebar}
-            />
-          </Box>
-          <Box fill background="light-2" align="center" justify="center">
-            Sidebar
-          </Box>
-        </Layer>
-      )
-    )
-  }
-}
+import theme from "./Themes/theme";
+import { AppBar } from "./Components/AppBar";
+import Filter from "./Containers/Filter";
+import Playlists from "./Containers/Playlists";
+import PlaylistsStats from "./Containers/PlaylistsStats";
+import Sidebar from "./Components/Sidebar";
+import Title from "./Components/Title";
 
 class App extends Component {
   constructor() {
-    super()
+    super();
     this.state = {
-      filterString: '',
+      filterString: "",
       playlists: [],
       showSidebar: false
-    }
+    };
   }
 
   componentDidMount() {
-    let access_token = queryString.parse(window.location.search).access_token
+    let access_token = queryString.parse(window.location.search).access_token;
     if (!access_token) {
-      console.log('No Access Token')
-      return  
+      console.log("No Access Token");
+      return;
     }
 
-    const handleErrors = (response) => {
-      if(!response.ok) { 
-        response.json().then( data => {
-          console.log(data.error)
-        })
-        throw Error(response)
+    const handleErrors = response => {
+      if (!response.ok) {
+        response.json().then(data => {
+          console.log(data.error);
+        });
+        throw Error(response);
       }
-      return response.json()
-    }
+      return response.json();
+    };
 
-    /* Fetch User Data*/
-    fetch('https://api.spotify.com/v1/me', {headers: {Authorization: 'Bearer ' + access_token} })
-    .then(handleErrors)
-    .then( data => {
-      this.setState( {user: {name: data.display_name}} ) 
-    })
-    .catch( error => {
-      console.log(error)
-      console.log(this.state.user)
-    })
-
-    /* Fetch User's Playlists */
-    fetch('https://api.spotify.com/v1/me/playlists', {
-      headers: {Authorization: 'Bearer ' + access_token}
+    /* Fetch User Data */
+    fetch("https://api.spotify.com/v1/me", {
+      headers: { Authorization: "Bearer " + access_token }
     })
       .then(handleErrors)
-      .then( playlistsData => {
-        let playlistTracksUrls = playlistsData.items.map( playlist => {
-          return playlist.tracks.href
-        })
-        let playlistTracks = playlistTracksUrls.map( playlistTracksUrl => {
-          //console.log('URL', playlistTracksUrl)
-          let tracksPromise = fetch(playlistTracksUrl, {headers: {Authorization: 'Bearer ' + access_token} })
-          return tracksPromise.then( response => response.json() )
-        })
-        let allPlaylistsTracksPromises = Promise.all(playlistTracks)
-        let playlistsPromise = allPlaylistsTracksPromises
-          .then( playlistsTracks => {
-            playlistsTracks.forEach( (tracks, i) => {
-              playlistsData.items[i].tracks = tracks
-            })
-            return playlistsData
-          })
-        return playlistsPromise
+      .then(data => {
+        this.setState({ user: { name: data.display_name } });
       })
-      .then( playlistsData => {
+      .catch(error => {
+        console.log(error);
+        console.log(this.state.user);
+      });
+
+    /* Fetch User's Playlists */
+    fetch("https://api.spotify.com/v1/me/playlists", {
+      headers: { Authorization: "Bearer " + access_token }
+    })
+      .then(handleErrors)
+      .then(playlistsData => {
+        let playlistTracksUrls = playlistsData.items.map(playlist => {
+          return playlist.tracks.href;
+        });
+        let playlistTracks = playlistTracksUrls.map(playlistTracksUrl => {
+          //console.log('URL', playlistTracksUrl)
+          let tracksPromise = fetch(playlistTracksUrl, {
+            headers: { Authorization: "Bearer " + access_token }
+          });
+          return tracksPromise.then(response => response.json());
+        });
+        let allPlaylistsTracksPromises = Promise.all(playlistTracks);
+        let playlistsPromise = allPlaylistsTracksPromises.then(
+          playlistsTracks => {
+            playlistsTracks.forEach((tracks, i) => {
+              playlistsData.items[i].tracks = tracks;
+            });
+            return playlistsData;
+          }
+        );
+        return playlistsPromise;
+      })
+      .then(playlistsData => {
         this.setState({
-          playlists: playlistsData.items.map( playlist => {
-            return ({
+          playlists: playlistsData.items.map(playlist => {
+            return {
               id: playlist.id,
               name: playlist.name,
-              imageUrl: playlist.images.find( image => image.width === 60 ? image.width === 60 : image.width === 640 ).url,
+              imageUrl: playlist.images.find(image =>
+                image.width === 60 ? image.width === 60 : image.width === 640
+              ).url,
               songs: playlist.tracks.items
-            })
+            };
           })
-        }) 
+        });
       })
-      .catch( error => console.log(error) )
+      .catch(error => console.log(error));
   }
 
   closeSidebar = () => {
-    this.setState({ showSidebar: false })
-  }
+    this.setState({ showSidebar: false });
+  };
 
   render() {
-    const { showSidebar } = this.state
-    const handleFilterInput = (input) => {
-      this.setState({ filterString: input })
-    }
-    
-    /* 
+    const { showSidebar } = this.state;
+    const handleFilterInput = input => {
+      this.setState({ filterString: input });
+    };
+
+    /*
      * Applying search string to filter playlist results.
      * Search string is applied to both playlist names, as well as track names.
      * If search string is contained in either a playlist name or track name,
      * then the corresponding playlist is returned in the results.
-    */
-    let playlists = this.state.user && this.state.playlists
-      ? this.state.playlists
-          .filter( playlist => {
+     */
+    let playlists =
+      this.state.user && this.state.playlists
+        ? this.state.playlists.filter(playlist => {
             let playlistNameFilter = playlist.name
               .toLowerCase()
-              .includes(this.state.filterString.toLowerCase())
+              .includes(this.state.filterString.toLowerCase());
 
-            let songNameFilter = false
-            playlist.songs.forEach( song => {
-              if (song.track.name
-                    .toLowerCase()
-                    .includes(this.state.filterString.toLowerCase())
-                  ) { 
-                    songNameFilter = true 
+            let songNameFilter = false;
+            playlist.songs.forEach(song => {
+              if (
+                song.track.name
+                  .toLowerCase()
+                  .includes(this.state.filterString.toLowerCase())
+              ) {
+                songNameFilter = true;
               }
-            })
+            });
 
-            let filterResults = playlistNameFilter || songNameFilter
-            
-            return filterResults
+            let filterResults = playlistNameFilter || songNameFilter;
+
+            return filterResults;
           })
-      : []
+        : [];
 
     return (
       <Grommet theme={theme} full>
@@ -275,42 +141,48 @@ class App extends Component {
           {size => (
             <Box fill>
               <AppBar>
-                <Heading level="3" margin="none">Spotify Playlists</Heading>
-                <Button 
-                  icon={<Notification />} 
-                  onClick={ () => { 
-                    this.setState( prevState => ({ showSidebar: !prevState.showSidebar}) ) 
+                <Heading level="3" margin="none">
+                  Spotify Playlists
+                </Heading>
+                <Button
+                  icon={<Notification />}
+                  onClick={() => {
+                    this.setState(prevState => ({
+                      showSidebar: !prevState.showSidebar
+                    }));
                   }}
-                >
-                </Button>
+                />
               </AppBar>
-              <Box direction="row" flex overflow={{ horizontal: 'hidden' }}>
+              <Box direction="row" flex overflow={{ horizontal: "hidden" }}>
                 <Box flex fill="horizontal">
-                {this.state.user
-                  ? <div>
-                      <Title name={this.state.user.name}/>
-                      <Filter onTextChange={ text => handleFilterInput(text)} />
-                      <PlaylistsStats playlists={playlists}/>
+                  {this.state.user ? (
+                    <div>
+                      <Title name={this.state.user.name} />
+                      <Filter onTextChange={text => handleFilterInput(text)} />
+                      <PlaylistsStats playlists={playlists} />
                       <Playlists playlists={playlists} />
-                    </div> 
-                  : <div>
-                      <Button 
+                    </div>
+                  ) : (
+                    <div>
+                      <Button
                         label="Sign in to Spotify"
                         onClick={() => {
-                          window.location = window.location.href.includes('localhost')
-                            ? 'http://localhost:8080/login'
-                            : 'http://localhost:8080/login'
+                          window.location = window.location.href.includes(
+                            "localhost"
+                          )
+                            ? "http://localhost:8080/login"
+                            : "http://localhost:8080/login";
                         }}
                         alignSelf="end"
                         margin="large"
                         primary
                       />
                     </div>
-                }
+                  )}
                 </Box>
-                <Sidebar 
-                  showSidebar={showSidebar} 
-                  size={size} 
+                <Sidebar
+                  showSidebar={showSidebar}
+                  size={size}
                   closeSidebar={this.closeSidebar}
                 />
               </Box>
