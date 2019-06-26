@@ -14,20 +14,7 @@ import {
 } from 'grommet';
 import { FormClose, Notification } from 'grommet-icons';
 import queryString from 'query-string';
-
-const theme = {
-  global: {
-    colors: {
-      brand: '#228BE6',
-    },
-    font: {
-      family: 'Roboto',
-      size: '14px',
-      height: '20px',
-    },
-  },
-};
-
+import theme from './Themes/theme'
 
 const AppBar = (props) => ( 
   <Box 
