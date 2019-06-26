@@ -20,14 +20,12 @@ export default class Playlists extends Component {
       });
     return (
       <Box overflow="visible"
-        pad={{
-          vertical: "medium",
-          horizontal: "medium",
-        }}
+        pad="large"
         background="light-2" 
         margin={{
           vertical: "medium",
         }}
+        flex="grow"
       >
         <Box width="xlarge" alignSelf="center" overflow="visible">
           <Grid

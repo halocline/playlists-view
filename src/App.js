@@ -153,13 +153,27 @@ class App extends Component {
                   }}
                 />
               </AppBar>
-              <Box direction="row" flex overflow={{ horizontal: "hidden" }}>
-                <Box flex fill="horizontal">
+              <Box direction="column" flex overflow={{ horizontal: "hidden" }}>
+                <Box flex>
                   {this.state.user ? (
-                    <Box as="div">
-                      <Title name={this.state.user.name} />
-                      <Filter onTextChange={text => handleFilterInput(text)} />
-                      <PlaylistsStats playlists={playlists} />
+                    <Box>
+                      <Box
+                        direction="column"
+                        width="xlarge"
+                        flex="grow"
+                        margin={{
+                          vertical: "medium"
+                        }}
+                        pad={{
+                          horizontal: "large"
+                        }}
+                      >
+                        <Title name={this.state.user.name} />
+                        <Filter
+                          onTextChange={text => handleFilterInput(text)}
+                        />
+                        <PlaylistsStats playlists={playlists} />
+                      </Box>
                       <Playlists playlists={playlists} />
                     </Box>
                   ) : (

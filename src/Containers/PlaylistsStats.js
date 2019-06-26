@@ -7,7 +7,7 @@ import PlaylistsTime from "./PlaylistsTime";
 export default class PlaylistsStats extends Component {
   render() {
     return (
-      <Box direction="row" margin="medium" gap="large">
+      <Box direction="row" gap="large">
         <PlaylistsNum playlists={this.props.playlists} />
         <PlaylistsSongs playlists={this.props.playlists} />
         <PlaylistsTime playlists={this.props.playlists} />
