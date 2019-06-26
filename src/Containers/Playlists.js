@@ -19,14 +19,25 @@ export default class Playlists extends Component {
         }
       });
     return (
-      <Box pad="medium" background="light-2">
-        <Grid
-          align="start"
-          columns={{ count: "fill", size: "small" }}
-          gap="medium"
-        >
-          {playlists}
-        </Grid>
+      <Box overflow="visible"
+        pad={{
+          vertical: "medium",
+          horizontal: "medium",
+        }}
+        background="light-2" 
+        margin={{
+          vertical: "medium",
+        }}
+      >
+        <Box width="xlarge" alignSelf="center" overflow="visible">
+          <Grid
+            align="start"
+            columns={{ count: "fill", size: "small" }}
+            gap="small"
+          >
+            {playlists}
+          </Grid>
+        </Box>
       </Box>
     );
   }

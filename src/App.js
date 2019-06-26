@@ -156,14 +156,14 @@ class App extends Component {
               <Box direction="row" flex overflow={{ horizontal: "hidden" }}>
                 <Box flex fill="horizontal">
                   {this.state.user ? (
-                    <div>
+                    <Box as="div">
                       <Title name={this.state.user.name} />
                       <Filter onTextChange={text => handleFilterInput(text)} />
                       <PlaylistsStats playlists={playlists} />
                       <Playlists playlists={playlists} />
-                    </div>
+                    </Box>
                   ) : (
-                    <div>
+                    <Box>
                       <Button
                         label="Sign in to Spotify"
                         onClick={() => {
@@ -177,7 +177,7 @@ class App extends Component {
                         margin="large"
                         primary
                       />
-                    </div>
+                    </Box>
                   )}
                 </Box>
                 <Sidebar
