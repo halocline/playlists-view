@@ -16,21 +16,7 @@ import { FormClose, Notification } from 'grommet-icons';
 import queryString from 'query-string';
 import theme from './Themes/theme'
 import { AppBar } from './Components/AppBar'
-import PlaylistsNum from './Containers/PlaylistsNum'
-import PlaylistsSongs from './Containers/PlaylistsSongs'
-import PlaylistsTime from './Containers/PlaylistsTime'
-
-class PlaylistsStats extends Component {
-  render() {
-    return (
-      <Box direction="row" margin="medium" gap="large">
-        <PlaylistsNum playlists={this.props.playlists}/>
-        <PlaylistsSongs playlists={this.props.playlists}/>
-        <PlaylistsTime playlists={this.props.playlists}/>
-      </Box>
-    )
-  }
-}
+import PlaylistsStats from './Containers/PlaylistsStats'
 
 class Filter extends Component {
   render() {
