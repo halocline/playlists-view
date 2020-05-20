@@ -1,36 +1,36 @@
-import React, { Component } from "react";
-import { Box, Button, Grommet, Heading, ResponsiveContext } from "grommet";
-import { Notification } from "grommet-icons";
-import queryString from "query-string";
+import React, { Component } from 'react';
+import { Box, Button, Grommet, Heading, ResponsiveContext } from 'grommet';
+import { Notification } from 'grommet-icons';
+import queryString from 'query-string';
 
-import theme from "./Themes/theme";
-import { AppBar } from "./Components/AppBar";
-import Filter from "./Containers/Filter";
-import Playlists from "./Containers/Playlists";
-import PlaylistsStats from "./Containers/PlaylistsStats";
-import Sidebar from "./Components/Sidebar";
-import Title from "./Components/Title";
+import theme from './Themes/theme';
+import { AppBar } from './Components/AppBar';
+import Filter from './Containers/Filter';
+import Playlists from './Containers/Playlists';
+import PlaylistsStats from './Containers/PlaylistsStats';
+import Sidebar from './Components/Sidebar';
+import Title from './Components/Title';
 
 class App extends Component {
   constructor() {
     super();
     this.state = {
-      filterString: "",
+      filterString: '',
       playlists: [],
-      showSidebar: false
+      showSidebar: false,
     };
   }
 
   componentDidMount() {
     let access_token = queryString.parse(window.location.search).access_token;
     if (!access_token) {
-      console.log("No Access Token");
+      console.log('No Access Token');
       return;
     }
 
-    const handleErrors = response => {
+    const handleErrors = (response) => {
       if (!response.ok) {
-        response.json().then(data => {
+        response.json().then((data) => {
           console.log(data.error);
         });
         throw Error(response);
@@ -39,60 +39,60 @@ class App extends Component {
     };
 
     /* Fetch User Data */
-    fetch("https://api.spotify.com/v1/me", {
-      headers: { Authorization: "Bearer " + access_token }
+    fetch('https://api.spotify.com/v1/me', {
+      headers: { Authorization: 'Bearer ' + access_token },
     })
       .then(handleErrors)
-      .then(data => {
+      .then((data) => {
         this.setState({ user: { name: data.display_name } });
       })
-      .catch(error => {
+      .catch((error) => {
         console.log(error);
         console.log(this.state.user);
       });
 
     /* Fetch User's Playlists */
-    fetch("https://api.spotify.com/v1/me/playlists", {
-      headers: { Authorization: "Bearer " + access_token }
+    fetch('https://api.spotify.com/v1/me/playlists', {
+      headers: { Authorization: 'Bearer ' + access_token },
     })
       .then(handleErrors)
-      .then(playlistsData => {
-        let playlistTracksUrls = playlistsData.items.map(playlist => {
+      .then((playlistsData) => {
+        let playlistTracksUrls = playlistsData.items.map((playlist) => {
           return playlist.tracks.href;
         });
-        let playlistTracks = playlistTracksUrls.map(playlistTracksUrl => {
+        let playlistTracks = playlistTracksUrls.map((playlistTracksUrl) => {
           //console.log('URL', playlistTracksUrl)
           let tracksPromise = fetch(playlistTracksUrl, {
-            headers: { Authorization: "Bearer " + access_token }
+            headers: { Authorization: 'Bearer ' + access_token },
           });
-          return tracksPromise.then(response => response.json());
+          return tracksPromise.then((response) => response.json());
         });
         let allPlaylistsTracksPromises = Promise.all(playlistTracks);
         let playlistsPromise = allPlaylistsTracksPromises.then(
-          playlistsTracks => {
+          (playlistsTracks) => {
             playlistsTracks.forEach((tracks, i) => {
               playlistsData.items[i].tracks = tracks;
             });
             return playlistsData;
-          }
+          },
         );
         return playlistsPromise;
       })
-      .then(playlistsData => {
+      .then((playlistsData) => {
         this.setState({
-          playlists: playlistsData.items.map(playlist => {
+          playlists: playlistsData.items.map((playlist) => {
             return {
               id: playlist.id,
               name: playlist.name,
-              imageUrl: playlist.images.find(image =>
-                image.width === 60 ? image.width === 60 : image.width === 640
+              imageUrl: playlist.images.find((image) =>
+                image.width === 60 ? image.width === 60 : image.width === 640,
               ).url,
-              songs: playlist.tracks.items
+              songs: playlist.tracks.items,
             };
-          })
+          }),
         });
       })
-      .catch(error => console.log(error));
+      .catch((error) => console.log(error));
   }
 
   closeSidebar = () => {
@@ -101,7 +101,7 @@ class App extends Component {
 
   render() {
     const { showSidebar } = this.state;
-    const handleFilterInput = input => {
+    const handleFilterInput = (input) => {
       this.setState({ filterString: input });
     };
 
@@ -113,13 +113,13 @@ class App extends Component {
      */
     let playlists =
       this.state.user && this.state.playlists
-        ? this.state.playlists.filter(playlist => {
+        ? this.state.playlists.filter((playlist) => {
             let playlistNameFilter = playlist.name
               .toLowerCase()
               .includes(this.state.filterString.toLowerCase());
 
             let songNameFilter = false;
-            playlist.songs.forEach(song => {
+            playlist.songs.forEach((song) => {
               if (
                 song.track.name
                   .toLowerCase()
@@ -138,12 +138,13 @@ class App extends Component {
     return (
       <Grommet theme={theme} full>
         <ResponsiveContext.Consumer>
-          {size => (
+          {(size) => (
             <Box fill>
               <AppBar>
                 <Heading level="3" margin="none">
                   Spotify Playlists
                 </Heading>
+                {/*}
                 <Button
                   icon={<Notification />}
                   onClick={() => {
@@ -152,8 +153,9 @@ class App extends Component {
                     }));
                   }}
                 />
+                */}
               </AppBar>
-              <Box direction="column" flex overflow={{ horizontal: "hidden" }}>
+              <Box direction="column" flex overflow={{ horizontal: 'hidden' }}>
                 <Box flex>
                   {this.state.user ? (
                     <Box>
@@ -162,43 +164,53 @@ class App extends Component {
                         width="xlarge"
                         flex="grow"
                         margin={{
-                          vertical: "medium"
+                          vertical: 'medium',
                         }}
                         pad={{
-                          horizontal: "large"
+                          horizontal: 'large',
                         }}
                       >
                         <Title name={this.state.user.name} />
                         <Filter
-                          onTextChange={text => handleFilterInput(text)}
+                          onTextChange={(text) => handleFilterInput(text)}
                         />
                         <PlaylistsStats playlists={playlists} />
                       </Box>
                       <Playlists playlists={playlists} />
                     </Box>
                   ) : (
-                    <Box>
+                    <Box
+                      height="xsmall"
+                      width="medium"
+                      alignSelf="center"
+                      margin="large"
+                    >
                       <Button
                         label="Sign in to Spotify"
                         onClick={() => {
                           window.location = window.location.href.includes(
-                            "localhost"
+                            'localhost',
                           )
-                            ? "http://localhost:8080/login"
-                            : "http://localhost:8080/login";
+                            ? 'http://localhost:8080/login'
+                            : 'http://localhost:8080/login';
                         }}
-                        alignSelf="end"
+                        alignSelf="center"
                         margin="large"
+                        fill
                         primary
+                        font-size="larger"
+                        type="button"
                       />
                     </Box>
                   )}
                 </Box>
+                {/*
                 <Sidebar
                   showSidebar={showSidebar}
                   size={size}
                   closeSidebar={this.closeSidebar}
                 />
+                */}
               </Box>
             </Box>
           )}
